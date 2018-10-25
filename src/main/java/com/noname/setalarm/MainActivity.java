@@ -17,6 +17,7 @@ import android.view.MenuItem;
 
 import com.noname.setalarm.databinding.ActivityMainBinding;
 import com.noname.setalarm.model.AlarmModel;
+import com.noname.setalarm.model.ClockModel;
 import com.noname.setalarm.repository.AlarmRoom;
 import com.noname.setalarm.view.AddAlarmActivity;
 import com.noname.setalarm.view.AlarmAdpater;
@@ -25,6 +26,7 @@ import com.noname.setalarm.viewmodel.AlarmRoomViewModel;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -62,6 +64,16 @@ public class MainActivity extends AppCompatActivity {
         alarmRoomViewModel.getListLiveData().observe(this, new Observer<List<AlarmRoom>>() {
             @Override
             public void onChanged(@Nullable List<AlarmRoom> alarmRooms) {
+                for (AlarmRoom alarmRoom : alarmRooms) {
+                    Collections.sort(alarmRoom.getTimeList() , new Comparator<ClockModel>() {
+
+                        @Override
+                        public int compare(ClockModel oldData, ClockModel newData) {
+                            // -1 - less than, 1 - greater than, 0 - equal, all inversed for descending
+                            return Integer.compare(newData.getId(), oldData.getId());
+                        }
+                    });
+                }
                 alarmAdpater.submitList(alarmRooms);
             }
         });

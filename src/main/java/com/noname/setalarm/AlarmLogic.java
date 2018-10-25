@@ -37,14 +37,19 @@ public class AlarmLogic {
         Calendar tmpCal = Calendar.getInstance();
         return tmpCal.get(Calendar.MINUTE);}
 
+    public int getCurrentSecond(){
+        Calendar tmpCal = Calendar.getInstance();
+        return tmpCal.get(Calendar.SECOND);}
+
     public long getCalendarTime(){
         return calendar.getTimeInMillis();
     }
 
-    public int makeID(int hour, int minute){
+    public int makeID(int hour, int minute, int second){
         StringBuilder sb = new StringBuilder();
         sb.append(hour);
         sb.append(minute);
+        sb.append(second);
 
         return Integer.parseInt(sb.toString());
     }

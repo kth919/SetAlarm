@@ -47,6 +47,7 @@ dependencies {
     implementation 'com.github.moldedbits:android-dial-picker:2cc815462e'
     implementation 'com.google.code.gson:gson:2.8.2'
     implementation 'jp.wasabeef:glide-transformations:3.1.1@aar'
+    implementation 'com.github.angads25:toggle:1.1.0'
 
     implementation "android.arch.lifecycle:extensions:$lifecycle_version"
     annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"

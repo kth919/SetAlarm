@@ -53,7 +53,7 @@ public class AlarmAdpater extends ListAdapter<AlarmRoom, AlarmAdpater.AlarmViewH
                     for (ClockModel clockModel : getItem(i).getTimeList()){
                         alarmLogic.setToCalendar(clockModel.getHour(), clockModel.getMinute(),
                                 clockModel.isAm_pm());
-                        alarmLogic.newAlarm(alarmLogic.makeID(clockModel.getHour(), clockModel.getMinute()),
+                        alarmLogic.newAlarm(clockModel.getId(),
                                 alarmLogic.getCalendarTime());
                     }
 
@@ -62,7 +62,7 @@ public class AlarmAdpater extends ListAdapter<AlarmRoom, AlarmAdpater.AlarmViewH
                     //알람은 intent로 취소하며 intent는 id 로 만들어진다.
                     //switch를 누른 리스트 위치의 custommodel list의 알람을 전부끈다.
                     for (ClockModel clockModel : getItem(i).getTimeList()) {
-                        alarmLogic.unregisterAlarm(alarmLogic.makeID(clockModel.getHour(), clockModel.getMinute()));
+                        alarmLogic.unregisterAlarm(clockModel.getId());
                     }
                 }
             }
@@ -71,7 +71,7 @@ public class AlarmAdpater extends ListAdapter<AlarmRoom, AlarmAdpater.AlarmViewH
         alarmViewHodler.getRecyclerItemAlarmBinding().cancleBtn.setOnClickListener(view -> {
             if (alarmViewHodler.getRecyclerItemAlarmBinding().onswitch.isChecked()){
                 for (ClockModel clockModel : getItem(i).getTimeList()) {
-                    alarmLogic.unregisterAlarm(alarmLogic.makeID(clockModel.getHour(), clockModel.getMinute()));
+                    alarmLogic.unregisterAlarm(clockModel.getId());
                 }
             }
 
@@ -105,7 +105,6 @@ public class AlarmAdpater extends ListAdapter<AlarmRoom, AlarmAdpater.AlarmViewH
             recyclerItemAlarmBinding = DataBindingUtil.bind(itemView);
             recyclerItemAlarmBinding.executePendingBindings();
             recyclerItemAlarmBinding.onswitch.setChecked(true);
-
 
         }
 

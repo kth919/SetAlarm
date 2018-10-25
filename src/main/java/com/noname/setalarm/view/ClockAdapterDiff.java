@@ -15,12 +15,14 @@ import com.noname.setalarm.databinding.RecyclerClockItemBinding;
 import com.noname.setalarm.model.ClockModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ClockAdapterDiff extends ListAdapter<ClockModel, ClockAdapterDiff.ClockViewHodler> {
 
     protected ClockAdapterDiff() {
         super(DIFF_CALLBACK);
+
     }
 
     @NonNull

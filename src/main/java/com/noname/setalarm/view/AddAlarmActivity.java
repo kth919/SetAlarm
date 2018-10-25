@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.LinearLayout;
 import android.widget.TimePicker;
 
 
@@ -35,6 +36,8 @@ import com.noname.setalarm.viewmodel.ClockViewModel;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,9 +47,7 @@ public class AddAlarmActivity extends AppCompatActivity {
     private ActivityAddalarmBinding activityAddalarmBinding;
 
     private AlarmLogic alarmLogic;
-    private int hour;
-    private int minute;
-    private boolean am_pm;
+    private boolean multi = false;
     private static String uid = java.util.UUID.randomUUID().toString();
     private ClockViewModel viewModel;
 
@@ -69,20 +70,24 @@ public class AddAlarmActivity extends AppCompatActivity {
         viewModel = ViewModelProviders.of(this).get(ClockViewModel.class);
 
         ArrayList<ClockModel> models = new ArrayList<>();
-        hour = alarmLogic.getCurrentHour();
-        minute = alarmLogic.getCurrentMinute();
-        Log.d(TAG, "HOUR + " + hour + "MINUTE : " + minute);
-        ClockModel clockModel = new ClockModel(alarmLogic.makeID(hour, minute), hour, minute, hour>=12);
+        alarmLogic.getCurrentHour();
+        alarmLogic.getCurrentMinute();
+
+        Log.d(TAG, "HOUR + " + alarmLogic.getCurrentHour() + "MINUTE : " + alarmLogic.getCurrentMinute());
+        ClockModel clockModel = new ClockModel(alarmLogic.makeID(alarmLogic.getCurrentHour(), alarmLogic.getCurrentMinute(), alarmLogic.getCurrentSecond()),
+                alarmLogic.getCurrentHour(), alarmLogic.getCurrentMinute(), alarmLogic.getCurrentHour()<12);
         models.add(clockModel);
         viewModel.insert(clockModel);
 
         ClockAdapterDiff clockAdapterDiff = new ClockAdapterDiff();
         viewModel.getListLiveData().observe(this, clockModels -> {
+            
             clockAdapterDiff.submitList(clockModels);
-//            Log.d(TAG , "model change" + "HOUR + " + hour + "MINUTE : " + minute);
+            Log.d(TAG , "모델추가");
         });
         activityAddalarmBinding.recycler.setAdapter(clockAdapterDiff);
-        activityAddalarmBinding.recycler.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        LinearLayoutManager horizontalLayout = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        activityAddalarmBinding.recycler.setLayoutManager(horizontalLayout);
 
         activityAddalarmBinding.timer.setIs24HourView(true);
         activityAddalarmBinding.timer.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener() {
@@ -90,41 +95,56 @@ public class AddAlarmActivity extends AppCompatActivity {
             public void onTimeChanged(TimePicker timePicker, int hourOfDay, int minutes) {
                 Log.d(TAG, "시" + hourOfDay + ":" + minutes + "분");
 
-                hour = hourOfDay;
-                minute = minutes;
-                viewModel.updateHour(hour, minute);
-                viewModel.updateMinute(hour, minute);
+                viewModel.updateHour(hourOfDay, minutes);
+                viewModel.updateMinute(hourOfDay, minutes);
 
                 Calendar datetime = Calendar.getInstance();
                 datetime.set(Calendar.HOUR_OF_DAY, hourOfDay);
-                datetime.set(Calendar.MINUTE, minute);
-
-                if (datetime.get(Calendar.AM_PM) == Calendar.AM) {
-                    am_pm = false;
-                }
-                else if (datetime.get(Calendar.AM_PM) == Calendar.PM) {
-                    am_pm = true;
-                }
+                datetime.set(Calendar.MINUTE, minutes);
 
                 revealam(hourOfDay);
 
             }
         });
 
-        activityAddalarmBinding.confirm.setOnClickListener(v -> {
-            List<ClockModel> tmpList = viewModel.getListLiveData().getValue();
-
-            for (int i = 0; i<tmpList.size(); i++) {
-                alarmLogic.setToCalendar(tmpList.get(i).getHour(),
-                        tmpList.get(i).getMinute(),
-                        tmpList.get(i).getHour() >= 12);
-                alarmLogic.newAlarm(tmpList.get(i).getHour() +
-                        tmpList.get(i).getMinute(),
-                        alarmLogic.getCalendarTime());
+        activityAddalarmBinding.timeSwitch.setOnToggledListener(new OnToggledListener() {
+            @Override
+            public void onSwitched(ToggleableView toggleableView, boolean isOn) {
+                multi = isOn;
+                Log.d(TAG, "체크" + isOn);
             }
-            viewModel.insertAlarm(new AlarmRoom(UUID.randomUUID().toString(), tmpList));
-            viewModel.deleteAll();
-            super.onBackPressed();
+        });
+
+
+        activityAddalarmBinding.confirm.setOnClickListener(v -> {
+
+            if (multi){
+
+                Calendar tmp = Calendar.getInstance();
+                Log.d(TAG, "추가");
+
+                ClockModel tmpClock = new ClockModel(alarmLogic.makeID(tmp.get(Calendar.HOUR_OF_DAY), tmp.get(Calendar.MINUTE), tmp.get(Calendar.SECOND)),
+                        tmp.get(Calendar.HOUR_OF_DAY), tmp.get(Calendar.MINUTE), tmp.get(Calendar.HOUR_OF_DAY)<12);
+                models.add(tmpClock);
+                viewModel.insert(tmpClock);
+
+            }else {
+                List<ClockModel> tmpList = viewModel.getListLiveData().getValue();
+
+                for (int i = 0; i<tmpList.size(); i++) {
+                    alarmLogic.setToCalendar(tmpList.get(i).getHour(),
+                            tmpList.get(i).getMinute(),
+                            tmpList.get(i).getHour() >= 12);
+                    alarmLogic.newAlarm(tmpList.get(i).getHour() +
+                                    tmpList.get(i).getMinute(),
+                            alarmLogic.getCalendarTime());
+                }
+                viewModel.insertAlarm(new AlarmRoom(UUID.randomUUID().toString(), tmpList));
+                viewModel.deleteAll();
+                super.onBackPressed();
+
+            }
+
         });
     }
 
@@ -183,6 +203,10 @@ public class AddAlarmActivity extends AppCompatActivity {
             }
         });
         hide.start();
+    }
+
+    private void sortClockModelList(ArrayList<ClockModel> target){
+
     }
 
 }
